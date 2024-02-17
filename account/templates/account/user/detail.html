@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load thumbnail %}
+
+{% block content %}
+    <h1>{{ user.get_full_name }}</h1>
+    <div class="profile-info">
+        <img src="{% thumbnail user.profile.photo 180x180 %}" class="user-detail">
+    </div>
+    <div class="follower-section">
+        {% with total_followers=user.followers.count %}
+        <span class="count">
+            <span class="total">{{ total_followers }}</span>
+            follower{{ total_followers|pluralize }}
+        </span>
+        {% if request.user != user %}
+            <div class="follow-button">
+                {% if is_following %}
+                    <a href="{% url 'account:unfollow_user' user.id %}" class="unfollow-button">
+                        Unfollow
+                    </a>
+                {% else %}
+                    <a href="{% url 'account:follow_user' user.id %}" class="follow-button">
+                        Follow
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <div id="image-list" class="image-container">
+        {% include "images/image/list_images.html" with images=user.images_created.all %}
+    </div>
+    {% endwith %}
+{% endblock content %}

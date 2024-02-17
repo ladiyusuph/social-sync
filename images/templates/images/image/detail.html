@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{{ image.title }}{% endblock %}
+
+{% block content %}
+  <h1>{{ image.title }}</h1>
+  {% load thumbnail %}
+  <a href="{{ image.image.url }}">
+    <img src="{% thumbnail image.image 300x0 %}" class="image-detail">
+  </a>
+  {% with total_likes=image.users_like.count users_like=image.users_like.all %}
+    <div class="image-info">
+      <div>
+        <span class="count">
+          <span class="total">{{ total_likes }}</span>
+          like{{ total_likes|pluralize }}
+        </span>
+        {% if request.user not in image.users_like.all %}
+          <a href="{% url "images:like_image" image.id %}">Like</a>
+        {% else %}
+        <a href="{% url "images:like_image" image.id %}">Unlike</a>
+        {% endif %}
+      </div>
+      <div>
+        {{ image.description|linebreaks }}
+      </div>
+    </div>
+    <div class="image-likes">
+      {% for user in users_like %}
+        <div>
+          {% if user.profile.photo %}
+            <img src="{{ user.profile.photo.url }}">
+          {% endif %}
+          <p>{{ user.first_name }}</p>
+        </div>
+      {% empty %}
+        Nobody likes yet.
+      {% endfor %}
+    </div>
+  {% endwith %}
+
+  {% comment %} <script>
+    $(document).ready(function() {
+      $('.like-button, .unlike-button').on('click', function() {
+        var url = $(this).data('url');
+        $.post(url, function(data) {
+          if ('liked' in data) {
+            // Update UI for liked state
+            $('.like-button').hide();
+            $('.unlike-button').show();
+          } else if ('unliked' in data) {
+            // Update UI for unliked state
+            $('.like-button').show();
+            $('.unlike-button').hide();
+          }
+        });
+      });
+    });
+  </script> {% endcomment %}
+{% endblock %}
